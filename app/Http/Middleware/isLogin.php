@@ -17,8 +17,8 @@ class isLogin
     public function handle(Request $request, Closure $next): Response
     {
        if (Auth::check()) {
-       return redirect()->route('todo');
+       return redirect("/");
        }
-        return $next($request);
+       return $next($request);
     }
 }

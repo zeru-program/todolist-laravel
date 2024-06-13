@@ -48,18 +48,26 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-          'task' => 'required|min:5'
-        ]);
-        
-        $data = [
+    $request->validate([
+        'task' => 'required|min:5',
+        'subtask1' => 'nullable|string',
+        'subtask2' => 'nullable|string',
+        'subtask3' => 'nullable|string',
+    ]);
+
+    $data = [
         'user' => Auth::user()->name,
-        'task' => $request->input('task')
-        ];
-        
-        Todo::create($data);
-        return redirect()->route('todo')->with('success', 'aktifitas disimpan!');
+        'task' => $request->input('task'),
+        'subtask1' => $request->input('subtask1'),
+        'subtask2' => $request->input('subtask2'),
+        'subtask3' => $request->input('subtask3'),
+    ];
+
+    Todo::create($data);
+
+    return redirect()->route('todo')->with('success', 'Aktivitas disimpan!');
     }
+
 
     /**
      * Display the specified resource.
@@ -83,17 +91,66 @@ class TodoController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-          'task' => 'required|min:5'
+          'task' => 'required|min:5',
+          "is_done" => 'nullable'
         ]);
         
         $data = [
         'task' => $request->input('task'),
-        'is_done' => $request->input('is_done')
         ];
+        
+        if ($request->filled('is_done')) {
+        $data['is_done'] = $request->input('is_done');
+        }
         
         Todo::where('id', $id)->update($data);
         return redirect()->route('todo')->with('success', 'perubahan data disimpan!');
     }
+    
+    public function updateSubtask(Request $request, string $id)
+    {
+        $request->validate([
+            'subtask1' => 'nullable|string',
+            'subtask2' => 'nullable|string',
+            'subtask3' => 'nullable|string',
+            'is_subtask1_done' => 'nullable|boolean',
+            'is_subtask2_done' => 'nullable|boolean',
+            'is_subtask3_done' => 'nullable|boolean'
+        ]);
+    
+        $data = [];
+    
+        foreach (['subtask1', 'subtask2', 'subtask3'] as $subtask) {
+            if ($request->has($subtask)) {
+                $data[$subtask] = $request->input($subtask);
+            }
+            if ($request->has('is_' . $subtask . '_done')) {
+                $data['is_' . $subtask . '_done'] = $request->input('is_' . $subtask . '_done');
+            }
+        }
+    
+        Todo::where('id', $id)->update($data);
+    
+        // Check if all relevant subtasks are done
+        $todo = Todo::findOrFail($id);
+        $isDone = true; // Assume true initially
+    
+        // Check each subtask if it exists and is done
+        foreach (['subtask1', 'subtask2', 'subtask3'] as $subtask) {
+            if ($todo->$subtask && !$todo->{'is_' . $subtask . '_done'}) {
+                $isDone = false; // If any relevant subtask is not done, set isDone to false
+                break; // No need to check further
+            }
+        }
+    
+        // Update is_done based on the result
+        $todo->is_done = $isDone ? 1 : 0;
+        $todo->save();
+    
+        return redirect()->route('todo')->with('success', 'Perubahan data disimpan!');
+    }
+
+
     
 
     /**

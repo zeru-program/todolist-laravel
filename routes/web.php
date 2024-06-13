@@ -22,6 +22,8 @@ Route::post('/', [TodoController::class, 'store'])->name('todo.post');
 
 Route::put('/{id}', [TodoController::class, 'update'])->name('todo.update');
 
+Route::put('/subtask/{id}', [TodoController::class, 'updateSubtask'])->name('subtask.update');
+
 Route::delete('/{id}', [TodoController::class, 'destroy'])->name('todo.delete');
 
 Route::get('/auth/login', [LoginController::class, 'index'])->middleware(isLogin::class)->name('login');

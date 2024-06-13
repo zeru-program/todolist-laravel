@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('user');
             $table->string('task');
-            $table->boolean('is_done')->default(false);
+            $table->string('subtask1')->nullable();
+            $table->string('subtask2')->nullable();
+            $table->string('subtask3')->nullable(); $table->boolean('is_done')->default(false); $table->boolean('is_subtask1_done')->default(false); $table->boolean('is_subtask2_done')->default(false); $table->boolean('is_subtask3_done')->default(false);
             $table->timestamps();
         });
     }
